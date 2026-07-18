@@ -1,0 +1,10 @@
+# OS
+.DS_Store
+
+# Local tooling / config — NOT part of the deployed site
+.agents/
+.claude/
+skills-lock.json
+
+# Node (installed under ~/.local; ignore any stray local artifacts)
+node_modules/

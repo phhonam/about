@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nam Pham, Researcher & Builder</title>
+  <meta name="description" content="Nam Pham, a researcher and builder studying how people order, gather, and make meaning." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <meta name="theme-color" content="#1f4fd0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --canvas-top: #e8f2fd;
+      --canvas-bot: #cbe0f6;
+      --dot:        rgba(30, 79, 176, 0.08);
+
+      --paper:  #fffdf8;
+      --ink:    #17263f;
+      --muted:  #566a88;
+      --faint:  #8493ac;
+      --accent: #1f4fd0;
+      --accent-deep: #143b9e;
+      --rule-blue: rgba(64, 116, 188, 0.26);
+      --rule-red:  rgba(206, 92, 104, 0.5);
+      --tape: rgba(226, 232, 210, 0.5);
+      --tape-edge: rgba(120, 130, 90, 0.16);
+
+      --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+      --sans: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --head: "Ioskeley Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+      --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+      --spring: cubic-bezier(0.34, 1.28, 0.5, 1);
+
+      --board-w: 1320px;
+      --board-h: 812px;
+    }
+
+    @font-face {
+      font-family: "Ioskeley Mono";
+      src: url("assets/fonts/IoskeleyMono-Bold.woff2") format("woff2");
+      font-weight: 700; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: "Ioskeley Mono";
+      src: url("assets/fonts/IoskeleyMono-ExtraBold.woff2") format("woff2");
+      font-weight: 800; font-style: normal; font-display: swap;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.55;
+      background:
+        radial-gradient(var(--dot) 1.3px, transparent 1.4px) 0 0 / 24px 24px,
+        linear-gradient(180deg, var(--canvas-top), var(--canvas-bot));
+      background-attachment: fixed;
+      overflow: hidden;                 /* one screen, no scroll */
+    }
+
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: rgba(31, 79, 208, 0.18); }
+    :focus-visible { outline: 2.5px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+    /* ===== Stage scales the board to fit any viewport ===== */
+    .stage {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+    .board {
+      position: relative;
+      width: var(--board-w);
+      height: var(--board-h);
+      transform: scale(var(--scale, 1));
+      transform-origin: center center;
+    }
+
+    /* ===== Background layer (recessed identity) ===== */
+    .intro {
+      position: absolute;
+      z-index: 0;
+      left: 34px;
+      top: 60px;
+      max-width: 30ch;
+      pointer-events: none;
+    }
+    .intro h1 {
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: 2.35rem;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      text-transform: lowercase;
+      margin: 0 0 0.65rem;
+      color: rgba(23, 42, 73, 0.94);
+    }
+    .intro .role { font-size: 1rem; font-weight: 500; color: var(--accent); margin: 0 0 1.1rem; }
+    .intro .bio {
+      font-size: 0.96rem;
+      line-height: 1.5;
+      color: rgba(40, 58, 88, 0.66);
+      margin: 0;
+      max-width: 42ch;
+      text-wrap: pretty;
+    }
+    .intro .bio em { font-style: normal; color: rgba(23, 42, 73, 0.82); font-weight: 500; }
+
+    /* ===== Top bar ===== */
+    .bar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 9999;
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.1rem clamp(1.1rem, 3.5vw, 2.4rem);
+      pointer-events: none;
+    }
+    .reset {
+      pointer-events: auto;
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(64, 116, 188, 0.24);
+      border-radius: 10px;
+      padding: 0.5rem 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition-property: color, background-color, scale;
+      transition-duration: 180ms;
+      transition-timing-function: var(--ease);
+    }
+    .reset:hover { color: var(--accent); background: #fff; }
+    .reset:active { scale: 0.96; }
+    .reset .rot { display: inline-block; transition: rotate 400ms var(--spring); }
+    .reset:hover .rot { rotate: -180deg; }
+
+    /* ===== Cards ===== */
+    .card {
+      position: absolute;
+      top: 0; left: 0;
+      width: var(--w, 320px);
+      cursor: grab;
+      will-change: transform;
+    }
+    .card.grabbing { cursor: grabbing; }
+
+    .card-tilt {
+      transform: scale(var(--s, 1));
+      transition: transform 220ms var(--spring), filter 240ms var(--ease);
+      filter: drop-shadow(0 10px 20px rgba(18, 42, 84, 0.16));
+    }
+    .card.grabbing .card-tilt { --s: 1.035; filter: drop-shadow(0 22px 38px rgba(18, 42, 84, 0.30)); }
+
+    .card-wobble { position: relative; transform-origin: center 40%; }
+
+    .card-face {
+      position: relative;
+      background: var(--paper);
+      border-radius: 16px 16px 0 0;
+      padding: 1.5rem 1.4rem 1.9rem 2.4rem;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    /* --- Index-card ruling --- */
+    .ruled {
+      --gap: 27px;
+      --top: 46px;
+      background-color: var(--paper);
+      background-image:
+        linear-gradient(var(--rule-red), var(--rule-red)),
+        linear-gradient(var(--rule-red), var(--rule-red)),
+        repeating-linear-gradient(180deg, transparent 0 calc(var(--gap) - 1.2px), var(--rule-blue) calc(var(--gap) - 1.2px) var(--gap));
+      background-repeat: no-repeat, no-repeat, repeat;
+      background-size: 100% 1.4px, 1.4px 100%, 100% 100%;
+      background-position: 0 var(--top), 30px 0, 0 var(--top);
+    }
+
+    /* --- Scalloped bottom edge --- */
+    .scallop .card-face {
+      --sc: 12px;
+      padding-bottom: 2.1rem;
+      -webkit-mask:
+        linear-gradient(#000 0 0) top / 100% calc(100% - var(--sc)) no-repeat,
+        radial-gradient(var(--sc) at 50% 0, #000 99%, #0000 101%) bottom / calc(var(--sc) * 2) var(--sc) repeat-x;
+      mask:
+        linear-gradient(#000 0 0) top / 100% calc(100% - var(--sc)) no-repeat,
+        radial-gradient(var(--sc) at 50% 0, #000 99%, #0000 101%) bottom / calc(var(--sc) * 2) var(--sc) repeat-x;
+    }
+
+    /* --- Tape --- */
+    .taped::before, .taped::after,
+    .tape1::before,
+    .tape-corner::before, .tape-corner::after {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      background: var(--tape);
+      border: 1px solid var(--tape-edge);
+      box-shadow: 0 1px 2px rgba(18, 42, 84, 0.10);
+      backdrop-filter: blur(0.5px);
+    }
+    .taped::before { width: 76px; height: 22px; top: -11px; left: 20px; transform: rotate(-6deg); }
+    .taped::after  { width: 76px; height: 22px; top: -11px; right: 20px; transform: rotate(5deg); }
+    .tape1::before { width: 88px; height: 23px; top: -12px; left: 50%; transform: translateX(-50%) rotate(-2.5deg); }
+    .tape-corner::before { width: 66px; height: 20px; top: 8px; left: -17px; transform: rotate(-45deg); }
+    .tape-corner::after  { width: 66px; height: 20px; top: 8px; right: -17px; transform: rotate(45deg); }
+
+    /* --- Photo (polaroid) --- */
+    .photo-frame { background: #fffefb; padding: 10px 10px 0; border-radius: 7px; }
+    .photo-frame img {
+      display: block; width: 100%; height: auto; border-radius: 3px;
+      outline: 1px solid rgba(0, 0, 0, 0.1); outline-offset: -1px;
+    }
+    .photo-cap { padding: 7px 3px 8px; font-size: 0.82rem; color: var(--ink); font-weight: 500; line-height: 1.25; }
+    .photo-cap .place { display: block; color: var(--faint); font-weight: 400; font-style: italic; font-size: 0.76rem; margin-top: 0; }
+
+    /* --- Photo stack (tap to send top to back) --- */
+    .photo-stack { position: relative; }
+    .photo-stack .stack-item {
+      position: absolute; inset: 0;
+      background: #fffefb; padding: 10px 10px 0; border-radius: 7px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 9px rgba(18, 42, 84, 0.17);
+      transition: transform 440ms var(--spring), box-shadow 240ms var(--ease);
+      cursor: pointer;
+    }
+    .photo-stack .stack-item:first-child { position: relative; }
+    .photo-stack .stack-item img {
+      display: block; width: 100%; height: auto; border-radius: 3px;
+      outline: 1px solid rgba(0, 0, 0, 0.1); outline-offset: -1px; pointer-events: none;
+    }
+    .stack-pin {
+      position: absolute;
+      z-index: 6;
+      top: -13px; right: 22px;
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at 34% 28%, #ffffff, #f1f5fa 62%, #dde5f0);
+      color: var(--accent);
+      font-size: 0.86rem; font-weight: 700;
+      line-height: 1;
+      border: 1px solid rgba(18, 42, 84, 0.07);
+      box-shadow: 0 1px 2px rgba(18, 42, 84, 0.16), 0 5px 11px -3px rgba(18, 42, 84, 0.34);
+      transition: transform 220ms var(--spring), box-shadow 220ms var(--ease);
+    }
+    .stack-pin:hover { transform: scale(1.1); box-shadow: 0 2px 4px rgba(18, 42, 84, 0.2), 0 9px 18px -3px rgba(18, 42, 84, 0.42); }
+    .stack-pin:active { transform: scale(0.94); }
+
+    /* --- Typography --- */
+    .label { font-size: 0.78rem; font-weight: 600; color: var(--accent); margin: 0 0 0.55rem; }
+    .art-date { font-size: 0.78rem; font-weight: 500; color: var(--faint); margin: 0 0 0.5rem; }
+    .c-title {
+      font-family: var(--head); font-weight: 700;
+      font-size: 1.1rem; line-height: 1.28; letter-spacing: -0.02em;
+      margin: 0 0 0.55rem; text-wrap: balance;
+    }
+    .c-dek { color: var(--muted); font-size: 0.94rem; margin: 0 0 1rem; text-wrap: pretty; }
+    .c-dek:last-child { margin-bottom: 0; }
+    .byline { color: var(--faint); font-size: 0.82rem; font-style: italic; }
+    .c-link {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-weight: 600; font-size: 0.86rem; color: var(--accent); cursor: pointer;
+    }
+    .c-link .arrow { transition: translate 240ms var(--ease); }
+    .c-link:hover { color: var(--accent-deep); }
+    .card:not(.grabbing) .c-link:hover .arrow { translate: 4px 0; }
+
+    /* --- CV card --- */
+    .cv-label { font-size: 0.8rem; font-weight: 600; color: var(--accent); margin: 0.9rem 0 0.3rem; }
+    .cv-label:first-child { margin-top: 0; }
+    .cv-row {
+      display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem;
+      padding: 0.14rem 0; font-size: 0.9rem; line-height: 1.45;
+    }
+    .cv-role { color: var(--ink); font-weight: 500; }
+    .cv-org { color: var(--muted); }
+    .cv-year { font-size: 0.8rem; font-variant-numeric: tabular-nums; color: var(--faint); white-space: nowrap; }
+
+    /* --- Contact card --- */
+    .contact-links { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .contact-links a {
+      font-size: 0.86rem; font-weight: 500; color: var(--muted);
+      padding: 0.38rem 0.7rem; border-radius: 9px; border: 1px solid rgba(64, 116, 188, 0.24);
+      transition-property: color, background-color, border-color, scale;
+      transition-duration: 170ms; transition-timing-function: var(--ease);
+    }
+    .contact-links a:hover { color: #fff; background: var(--accent); border-color: var(--accent); }
+    .contact-links a:active { scale: 0.95; }
+
+    /* ===== Entrance ===== */
+    @media (prefers-reduced-motion: no-preference) {
+      .card-face, .photo-frame { animation: cardIn 0.62s var(--ease) backwards; animation-delay: var(--d, 0ms); }
+      .photo-stack { animation: fadeIn 0.6s var(--ease) backwards; animation-delay: var(--d, 0ms); }
+      .intro > * { animation: introIn 0.8s var(--ease) backwards; }
+      .intro h1 { animation-delay: 0.05s; }
+      .intro .role { animation-delay: 0.14s; }
+      .intro .bio { animation-delay: 0.22s; }
+    }
+    @keyframes cardIn { from { opacity: 0; transform: translateY(18px) scale(0.94); } to { opacity: 1; transform: none; } }
+    @keyframes introIn { from { opacity: 0; transform: translateY(12px); filter: blur(5px); } to { opacity: 1; transform: none; filter: blur(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    @media (min-width: 760px) { .card { touch-action: none; } }
+
+    /* ===== Mobile stacked fallback ===== */
+    @media (max-width: 759px) {
+      body { overflow: auto; }
+      .stage { position: static; display: block; overflow: visible; }
+      .board { width: auto; height: auto; transform: none !important; display: flex; flex-direction: column; gap: 1.15rem; padding: 4.5rem 1.1rem 3rem; }
+      .intro { position: relative; left: auto; top: auto; margin: 0 auto 0.5rem; pointer-events: auto; }
+      .card { position: relative !important; transform: none !important; width: 100% !important; max-width: 440px; margin: 0 auto; cursor: default; }
+      .card-wobble { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="board" id="canvas">
+
+      <header class="intro">
+        <h1>nam pham</h1>
+        <p class="role">Senior Researcher · DoorDash</p>
+        <p class="bio">I use mixed-method research to build <em>0-to-1 products</em>, developing research eval practices that keep real, messy human users in the loop as we build AI/LLM products. I find joy in poking at research methods and making new tools.</p>
+      </header>
+
+      <!-- Article (ruled + double tape) -->
+      <article class="card" data-x="470" data-y="34" data-tilt="2" style="--w: 322px; --d: 90ms;">
+        <div class="card-tilt"><div class="card-wobble taped"><div class="card-face ruled">
+          <p class="art-date">Feb 2026</p>
+          <h2 class="c-title">How Cursor &amp; Claude Code Are Changing Research</h2>
+          <p class="c-dek">An early investigation into bringing agentic coding tools into the research workflow, and what shifts when you do.</p>
+          <a class="c-link" href="https://medium.com/design-doordash/how-cursor-claude-code-are-changing-research-at-doordash-and-deliveroo-c2b534018af5" target="_blank" rel="noopener">Read on Medium <span class="arrow" aria-hidden="true">→</span></a>
+        </div></div></div>
+      </article>
+
+      <!-- Silkscreen transcripts (photo stack) -->
+      <article class="card stack-card" data-x="952" data-y="22" data-tilt="4" style="--w: 262px; --d: 160ms;">
+        <div class="card-tilt"><div class="card-wobble tape-corner">
+          <div class="photo-stack" id="silk-stack">
+            <div class="stack-item">
+              <img src="assets/silkscreen-2.jpg" alt="Silkscreened transcript on fabric reading 'moment where everyone has to sort of create a brand and'" />
+              <p class="photo-cap">Deconstructed interview transcripts<span class="place">silkscreen on muslin · Parsons</span></p>
+            </div>
+            <div class="stack-item">
+              <img src="assets/silkscreen-1.jpg" alt="Fabric banners of a silkscreened interview transcript hanging by a window" />
+              <p class="photo-cap">Deconstructed interview transcripts<span class="place">silkscreen on muslin · Parsons</span></p>
+            </div>
+            <div class="stack-item">
+              <img src="assets/silkscreen-3.jpg" alt="Angled view of the silkscreened transcript fabric in sunlight" />
+              <p class="photo-cap">Deconstructed interview transcripts<span class="place">silkscreen on muslin · Parsons</span></p>
+            </div>
+          </div>
+          <a class="stack-pin" href="https://phhonam.medium.com/queering-the-interview-67d26b6a4ea3" target="_blank" rel="noopener" aria-label="Read the essay on Medium" title="Read the essay on Medium">↗</a>
+        </div></div>
+      </article>
+
+      <!-- Subplotly (scallop + single tape) -->
+      <article class="card scallop" data-x="576" data-y="378" data-tilt="3" style="--w: 302px; --d: 240ms;">
+        <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
+          <h2 class="c-title">Subplot</h2>
+          <p class="c-dek">Movie DNA, decoded. Match films by the emotional wreckage they leave behind: found family, revenge arcs, one bad wedding.</p>
+          <a class="c-link" href="https://subplotly.com/" target="_blank" rel="noopener">subplotly.com <span class="arrow" aria-hidden="true">→</span></a>
+        </div></div></div>
+      </article>
+
+      <!-- CV / trajectory (scallop + double tape) -->
+      <article class="card scallop" data-x="46" data-y="330" data-tilt="-1.5" style="--w: 330px; --d: 320ms;">
+        <div class="card-tilt"><div class="card-wobble taped"><div class="card-face ruled">
+          <p class="cv-label">Currently</p>
+          <div class="cv-row"><span><span class="cv-role">Sr. Researcher</span>, <span class="cv-org">DoorDash</span></span><span class="cv-year">2023—now</span></div>
+          <p class="cv-label">Previously</p>
+          <div class="cv-row"><span><span class="cv-role">Sr. Researcher</span>, <span class="cv-org">Realtor.com</span></span><span class="cv-year">2021—23</span></div>
+          <div class="cv-row"><span><span class="cv-role">User Researcher</span>, <span class="cv-org">K12.com</span></span><span class="cv-year">2020—21</span></div>
+          <div class="cv-row"><span><span class="cv-role">UX Architect</span>, <span class="cv-org">Ogilvy</span></span><span class="cv-year">2013—18</span></div>
+          <div class="cv-row"><span><span class="cv-role">UX Design</span>, <span class="cv-org">Autodesk</span></span><span class="cv-year">2013</span></div>
+          <p class="cv-label">Education</p>
+          <div class="cv-row"><span><span class="cv-role">MFA, Transdisciplinary Design</span>, <span class="cv-org">Parsons</span></span><span class="cv-year">2018—20</span></div>
+        </div></div></div>
+      </article>
+
+      <!-- Salon (scallop + single tape) -->
+      <article class="card scallop" data-x="978" data-y="352" data-tilt="-3.5" style="--w: 268px; --d: 400ms;">
+        <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
+          <h2 class="c-title">Interdisciplinary salons</h2>
+          <a class="c-link" href="https://weareagenius.com/" target="_blank" rel="noopener">first person plural <span class="arrow" aria-hidden="true">→</span></a>
+        </div></div></div>
+      </article>
+
+      <!-- End of Life Festival (photo) -->
+      <article class="card" data-x="378" data-y="576" data-tilt="-2.5" style="--w: 262px; --d: 480ms;">
+        <div class="card-tilt"><div class="card-wobble tape-corner"><div class="photo-frame">
+          <img src="assets/end-of-life.jpg" alt="Participants in conversation around tables at the End of Life Festival workshop" />
+          <p class="photo-cap">End of Life Festival<span class="place">public workshop · New York</span></p>
+        </div></div></div>
+      </article>
+
+      <!-- Contact (scallop + single tape) -->
+      <article class="card scallop" data-x="1012" data-y="586" data-tilt="2.5" style="--w: 250px; --d: 540ms;">
+        <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
+          <p class="label">Say hello</p>
+          <div class="contact-links">
+            <a href="mailto:phhonam@gmail.com">Email</a>
+            <a href="https://www.linkedin.com/in/namph/" target="_blank" rel="noopener">LinkedIn</a>
+          </div>
+        </div></div></div>
+      </article>
+
+    </div>
+  </div>
+
+  <div class="bar">
+    <button class="reset" id="reset" type="button"><span class="rot">↺</span> reset</button>
+  </div>
+
+  <script>
+    (function () {
+      const board = document.getElementById('canvas');
+      const cards = Array.from(document.querySelectorAll('.card'));
+      const mqDesk = window.matchMedia('(min-width: 760px)');
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let ztop = 100;
+      let scale = 1;
+
+      // Fit the fixed-size board into the viewport (contain) — guarantees one screen, no scroll.
+      const BOARD_W = 1320, BOARD_H = 812;
+      function fit() {
+        if (!mqDesk.matches) { scale = 1; board.style.removeProperty('--scale'); return; }
+        scale = Math.min(window.innerWidth * 0.98 / BOARD_W, window.innerHeight * 0.955 / BOARD_H);
+        board.style.setProperty('--scale', scale);
+      }
+
+      const S = cards.map((el) => ({
+        el,
+        wobEl: el.querySelector('.card-wobble'),
+        homeX: parseFloat(el.dataset.x) || 0,
+        homeY: parseFloat(el.dataset.y) || 0,
+        initX: parseFloat(el.dataset.x) || 0,
+        initY: parseFloat(el.dataset.y) || 0,
+        baseTilt: parseFloat(el.dataset.tilt) || 0,
+        ox: 0, oy: 0, ovx: 0, ovy: 0, orot: 0, ovr: 0,
+        wob: 0,
+        dragging: false, moved: false, moveAccum: 0, phase: Math.random() * 6.2832,
+        lastPX: 0, lastPY: 0, dvx: 0, dvy: 0, onTap: null,
+      }));
+
+      const render = (s) => {
+        s.el.style.transform =
+          `translate3d(${s.homeX + s.ox}px, ${s.homeY + s.oy}px, 0) rotate(${s.baseTilt + s.orot}deg)`;
+      };
+
+      // ----- Drag (deltas are in screen px; divide by scale for board coords) -----
+      S.forEach((s) => {
+        const el = s.el;
+        el.addEventListener('pointerdown', (e) => {
+          if (!mqDesk.matches) return;
+          if (e.target.closest('a, button')) return;
+          s.dragging = true;
+          el.classList.add('grabbing');
+          el.style.zIndex = ++ztop;
+          el.setPointerCapture(e.pointerId);
+          s.lastPX = e.clientX; s.lastPY = e.clientY;
+          s.dvx = 0; s.dvy = 0;
+          s.moved = false; s.moveAccum = 0;
+          e.preventDefault();
+        });
+        el.addEventListener('pointermove', (e) => {
+          if (!s.dragging) return;
+          const dx = (e.clientX - s.lastPX) / scale, dy = (e.clientY - s.lastPY) / scale;
+          s.lastPX = e.clientX; s.lastPY = e.clientY;
+          s.homeX += dx; s.homeY += dy;
+          s.dvx = dx; s.dvy = dy;
+          s.moveAccum += Math.abs(dx) + Math.abs(dy);
+          if (s.moveAccum > 5) s.moved = true;
+          s.ox *= 0.6; s.oy *= 0.6;
+          if (reduce) render(s);
+        });
+        const up = () => {
+          if (!s.dragging) return;
+          s.dragging = false;
+          el.classList.remove('grabbing');
+          if (!reduce) { s.ovx += s.dvx * 0.5; s.ovy += s.dvy * 0.5; s.wob = Math.min(5, s.wob + 2); }
+          if (!s.moved && typeof s.onTap === 'function') s.onTap();
+        };
+        el.addEventListener('pointerup', up);
+        el.addEventListener('pointercancel', up);
+      });
+
+      // ----- Photo stack: tap sends the top polaroid to the back -----
+      (() => {
+        const sc = S.find((s) => s.el.classList.contains('stack-card'));
+        if (!sc) return;
+        const stackEl = sc.el.querySelector('.photo-stack');
+        const items = Array.from(stackEl.querySelectorAll('.stack-item'));
+        const POSE = [{ x: 0, y: 0, r: -1.5 }, { x: 11, y: 7, r: 3 }, { x: -8, y: 12, r: -4.5 }];
+        let order = items.map((_, i) => i);
+        const layout = () => {
+          order.forEach((idx, depth) => {
+            const p = POSE[depth] || POSE[POSE.length - 1];
+            items[idx].style.zIndex = String(items.length - depth);
+            items[idx].style.transform = `translate(${p.x}px, ${p.y}px) rotate(${p.r}deg)`;
+          });
+        };
+        layout();
+        const cycle = () => { order.push(order.shift()); layout(); };
+        sc.onTap = cycle;
+        stackEl.addEventListener('click', () => { if (mqDesk.matches) return; cycle(); });
+      })();
+
+      // ----- Cursor draft: shiver cards it sweeps over -----
+      if (!reduce) {
+        let lastX = null, lastY = null;
+        window.addEventListener('pointermove', (e) => {
+          if (lastX !== null) {
+            const speed = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+            if (speed > 0.5) {
+              for (const s of S) {
+                if (s.dragging) continue;
+                const r = s.el.getBoundingClientRect();
+                const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+                const inf = Math.max(0, 1 - Math.hypot(e.clientX - cx, e.clientY - cy) / 240);
+                if (inf > 0) {
+                  s.wob = Math.min(6, s.wob + speed * inf * 0.05);
+                  s.ovx += (e.clientX - lastX) * inf * 0.02 / scale;
+                  s.ovy += (e.clientY - lastY) * inf * 0.02 / scale;
+                }
+              }
+            }
+          }
+          lastX = e.clientX; lastY = e.clientY;
+        }, { passive: true });
+      }
+
+      // ----- Physics loop -----
+      function loop(now) {
+        if (mqDesk.matches) {
+          for (const s of S) {
+            if (!reduce && !s.dragging) {
+              const wx = 4.5 * (Math.sin(now * 0.00055 + s.phase) + 0.4 * Math.sin(now * 0.00127 + s.phase * 1.7));
+              const wy = 2.6 * Math.sin(now * 0.00086 + s.phase + 1.1);
+              s.ovx += (wx - s.ox) * 0.012; s.ovx *= 0.9; s.ox += s.ovx;
+              s.ovy += (wy - s.oy) * 0.012; s.ovy *= 0.9; s.oy += s.ovy;
+              const wr = 0.5 * Math.sin(now * 0.0007 + s.phase + 0.5);
+              s.ovr += (wr - s.orot) * 0.01; s.ovr *= 0.9; s.orot += s.ovr;
+            }
+            render(s);
+
+            if (!reduce) {
+              s.wob *= 0.9;
+              if (s.wob > 0.02) {
+                const a = s.wob * Math.sin(now * 0.021 + s.phase);
+                const b = s.wob * 0.7 * Math.sin(now * 0.027 + s.phase * 1.4);
+                const sq = 1 - s.wob * 0.004;
+                s.wobEl.style.transform = `skewX(${a}deg) skewY(${b * 0.4}deg) scale(${sq}, ${1 / sq})`;
+              } else {
+                s.wobEl.style.transform = '';
+              }
+            }
+          }
+        }
+        requestAnimationFrame(loop);
+      }
+
+      function syncAll() {
+        fit();
+        for (const s of S) {
+          if (mqDesk.matches) render(s);
+          else { s.el.style.transform = ''; s.wobEl.style.transform = ''; }
+        }
+      }
+      fit();
+      syncAll();
+      window.addEventListener('resize', fit);
+      mqDesk.addEventListener('change', syncAll);
+      requestAnimationFrame(loop);
+
+      // ----- Reset -----
+      document.getElementById('reset').addEventListener('click', () => {
+        ztop = 100;
+        for (const s of S) {
+          s.el.style.zIndex = '';
+          s.homeX = s.initX; s.homeY = s.initY;
+          s.ox = s.oy = s.ovx = s.ovy = s.orot = s.ovr = 0;
+          s.wob = Math.min(6, s.wob + 1.5);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
