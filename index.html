@@ -249,13 +249,13 @@
     }
     .c-photo {
       position: absolute; z-index: 3;
-      top: 2.1rem; right: -4.4rem; width: 11rem; margin: 0;
+      top: 0.9rem; right: -4.4rem; width: 11rem; margin: 0;
       background: #fffefb; padding: 7px; border-radius: 5px;
       box-shadow: 0 1px 2px rgba(18, 42, 84, 0.14), 0 7px 15px -5px rgba(18, 42, 84, 0.32);
       transform: rotate(3deg);
     }
-    .card-face.has-photo { overflow: visible; padding-right: 7.5rem; }
-    .has-photo .c-link { margin-right: -7rem; }
+    .card-face.has-photo { overflow: visible; }
+    .has-photo .art-date, .has-photo .c-title { margin-right: 5.8rem; }
     .c-photo::before {
       content: ""; position: absolute; z-index: 2;
       width: 58px; height: 18px; top: -9px; left: 50%; transform: translateX(-50%) rotate(2.5deg);
@@ -334,9 +334,8 @@
       .intro { position: relative; left: auto; top: auto; margin: 0 auto 0.5rem; pointer-events: auto; }
       .card { position: relative !important; transform: none !important; width: 100% !important; max-width: 440px; margin: 0 auto; cursor: default; }
       .card-wobble { transform: none !important; }
-      .card-face.has-photo { padding-right: 1.7rem; }
       .c-photo { position: relative; top: auto; right: auto; width: 72%; margin: 0.1rem 0 1.05rem 0.2rem; transform: rotate(-1.8deg); }
-      .has-photo .c-link { margin-right: 0; }
+      .has-photo .art-date, .has-photo .c-title { margin-right: 0; }
     }
   </style>
 </head>
