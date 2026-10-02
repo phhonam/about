@@ -142,6 +142,28 @@
     }
     .card.grabbing .card-tilt { --s: 1.035; filter: drop-shadow(0 22px 38px rgba(18, 42, 84, 0.30)); }
 
+    /* Circular underglow that blooms outward from the card's center */
+    .card::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      left: 50%; top: 50%;
+      width: calc(100% + 80px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(closest-side,
+        rgba(22, 60, 148, 0.34) 0%, rgba(22, 60, 148, 0.30) 40%, rgba(22, 60, 148, 0.18) 62%,
+        rgba(22, 60, 148, 0.07) 80%, rgba(22, 60, 148, 0.02) 92%, rgba(22, 60, 148, 0) 100%);
+      transform: translate(-50%, -50%) scale(0.7);
+      opacity: 0;
+      transition: opacity 380ms var(--ease), transform 460ms var(--spring);
+      pointer-events: none;
+    }
+    @media (hover: hover) {
+      .card:hover::before { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+    .card.grabbing::before { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
     .card-wobble { position: relative; transform-origin: center 40%; }
 
     .card-face {
@@ -285,6 +307,11 @@
       color: var(--faint); margin-right: -0.1rem;
     }
 
+    /* --- Coffee / tea stains (AI Evals card) --- */
+    .stains { position: absolute; inset: 0; z-index: 3; pointer-events: none; mix-blend-mode: multiply; }
+    .stains svg { position: absolute; overflow: visible; }
+    .stain-defs { position: absolute; width: 0; height: 0; }
+
     /* --- CV card --- */
     .cv-label { font-size: 0.8rem; font-weight: 600; color: var(--accent); margin: 0.9rem 0 0.3rem; }
     .cv-label:first-child { margin-top: 0; }
@@ -336,6 +363,7 @@
       .card-wobble { transform: none !important; }
       .c-photo { position: relative; top: auto; right: auto; width: 72%; margin: 0.1rem 0 1.05rem 0.2rem; transform: rotate(-1.8deg); }
       .has-photo .art-date, .has-photo .c-title { margin-right: 0; }
+      .stains { clip-path: inset(0); }
     }
   </style>
 </head>
@@ -426,7 +454,7 @@
       </article>
 
       <!-- AI Evals series (scallop + single tape) -->
-      <article class="card scallop" data-x="962" data-y="318" data-tilt="-2" style="--w: 330px; --d: 600ms;">
+      <article class="card scallop" data-x="948" data-y="318" data-tilt="-2" style="--w: 330px; --d: 600ms;">
         <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
           <p class="art-date">Series · Sep 2026</p>
           <h2 class="c-title">Building AI Evals</h2>
@@ -435,7 +463,52 @@
             <li><a class="c-link" href="https://medium.com/design-doordash/building-ai-evals-who-gets-to-decide-whats-good-39671385f50d" target="_blank" rel="noopener"><span class="part">1</span>Who gets to decide what’s good? <span class="arrow" aria-hidden="true">→</span></a></li>
             <li><a class="c-link" href="https://medium.com/@designdoordash/building-ai-evals-who-are-the-experts-f1dd8b0ffa29" target="_blank" rel="noopener"><span class="part">2</span>Who are the “experts”? <span class="arrow" aria-hidden="true">→</span></a></li>
           </ul>
-        </div></div></div>
+          <svg class="stain-defs" aria-hidden="true" focusable="false">
+            <defs>
+              <filter id="stain-rough" x="-25%" y="-25%" width="150%" height="150%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" seed="7" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="9"/>
+              </filter>
+              <filter id="stain-edge" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="11" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5" result="d"/>
+                <feGaussianBlur in="d" stdDeviation="0.5"/>
+              </filter>
+              <filter id="stain-bleed" x="-40%" y="-40%" width="180%" height="180%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" seed="5" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="9" result="d"/>
+                <feGaussianBlur in="d" stdDeviation="3.2"/>
+              </filter>
+              <filter id="stain-soft" x="-30%" y="-30%" width="160%" height="160%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="14" result="d"/>
+                <feGaussianBlur in="d" stdDeviation="1.6"/>
+              </filter>
+            </defs>
+          </svg>
+        </div>
+        <div class="stains" aria-hidden="true">
+          <!-- coffee ring with a big and a small sparkle soaked in; sits on top of the card and bleeds past its edge -->
+          <svg viewBox="0 0 190 190" width="130" height="130" style="right:-58px; top:-52px; transform: rotate(12deg);">
+            <defs>
+              <path id="spark" d="M0 -1 C0.06 -0.42 0.42 -0.06 1 0 C0.42 0.06 0.06 0.42 0 1 C-0.06 0.42 -0.42 0.06 -1 0 C-0.42 -0.06 -0.06 -0.42 0 -1 Z"/>
+            </defs>
+            <g filter="url(#stain-rough)">
+              <circle cx="95" cy="95" r="62" fill="rgba(150,96,42,0.09)"/>
+              <circle cx="95" cy="95" r="58" fill="none" stroke="rgba(130,80,34,0.17)" stroke-width="14" filter="url(#stain-soft)"/>
+              <circle cx="95" cy="95" r="62" fill="none" stroke="rgba(112,66,26,0.55)" stroke-width="3" stroke-dasharray="340 50" stroke-linecap="round"/>
+            </g>
+            <g filter="url(#stain-bleed)">
+              <use href="#spark" transform="translate(88 104) scale(27)" fill="rgba(130,80,34,0.17)" stroke="rgba(130,80,34,0.17)" stroke-width="0.3" stroke-linejoin="round"/>
+              <use href="#spark" transform="translate(124 64) scale(12)" fill="rgba(130,80,34,0.17)" stroke="rgba(130,80,34,0.17)" stroke-width="0.5" stroke-linejoin="round"/>
+            </g>
+            <g filter="url(#stain-edge)">
+              <use href="#spark" transform="translate(88 104) scale(27)" fill="rgba(122,72,28,0.22)" stroke="rgba(112,66,26,0.3)" stroke-width="0.04" stroke-linejoin="round"/>
+              <use href="#spark" transform="translate(124 64) scale(12)" fill="rgba(122,72,28,0.22)" stroke="rgba(112,66,26,0.3)" stroke-width="0.08" stroke-linejoin="round"/>
+            </g>
+          </svg>
+        </div>
+        </div></div>
       </article>
 
     </div>
@@ -534,30 +607,6 @@
         sc.onTap = cycle;
         stackEl.addEventListener('click', () => { if (mqDesk.matches) return; cycle(); });
       })();
-
-      // ----- Cursor draft: shiver cards it sweeps over -----
-      if (!reduce) {
-        let lastX = null, lastY = null;
-        window.addEventListener('pointermove', (e) => {
-          if (lastX !== null) {
-            const speed = Math.hypot(e.clientX - lastX, e.clientY - lastY);
-            if (speed > 0.5) {
-              for (const s of S) {
-                if (s.dragging) continue;
-                const r = s.el.getBoundingClientRect();
-                const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-                const inf = Math.max(0, 1 - Math.hypot(e.clientX - cx, e.clientY - cy) / 240);
-                if (inf > 0) {
-                  s.wob = Math.min(6, s.wob + speed * inf * 0.05);
-                  s.ovx += (e.clientX - lastX) * inf * 0.02 / scale;
-                  s.ovy += (e.clientY - lastY) * inf * 0.02 / scale;
-                }
-              }
-            }
-          }
-          lastX = e.clientX; lastY = e.clientY;
-        }, { passive: true });
-      }
 
       // ----- Physics loop -----
       function loop(now) {
