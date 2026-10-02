@@ -86,10 +86,12 @@
       overflow: hidden;
     }
     .board {
-      position: relative;
+      position: absolute;
+      left: 50%;
+      top: 50%;
       width: var(--board-w);
       height: var(--board-h);
-      transform: scale(var(--scale, 1));
+      transform: translate(-50%, -50%) scale(var(--scale, 1));
       transform-origin: center center;
     }
 
@@ -309,7 +311,7 @@
     @media (max-width: 759px) {
       body { overflow: auto; }
       .stage { position: static; display: block; overflow: visible; }
-      .board { width: auto; height: auto; transform: none !important; display: flex; flex-direction: column; gap: 1.15rem; padding: 4.5rem 1.1rem 3rem; }
+      .board { position: relative; left: auto; top: auto; width: auto; height: auto; transform: none !important; display: flex; flex-direction: column; gap: 1.15rem; padding: 4.5rem 1.1rem 3rem; }
       .intro { position: relative; left: auto; top: auto; margin: 0 auto 0.5rem; pointer-events: auto; }
       .card { position: relative !important; transform: none !important; width: 100% !important; max-width: 440px; margin: 0 auto; cursor: default; }
       .card-wobble { transform: none !important; }
