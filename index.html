@@ -247,6 +247,25 @@
       font-size: 1.1rem; line-height: 1.28; letter-spacing: -0.02em;
       margin: 0 0 0.55rem; text-wrap: balance;
     }
+    .c-photo {
+      position: absolute; z-index: 3;
+      top: -0.2rem; right: -3.6rem; width: 11rem; margin: 0;
+      background: #fffefb; padding: 7px; border-radius: 5px;
+      box-shadow: 0 1px 2px rgba(18, 42, 84, 0.14), 0 7px 15px -5px rgba(18, 42, 84, 0.32);
+      transform: rotate(5.5deg);
+    }
+    .card-face.has-photo { overflow: visible; }
+    .has-photo .art-date, .has-photo .c-title { margin-right: 6.5rem; }
+    .c-photo::before {
+      content: ""; position: absolute; z-index: 2;
+      width: 58px; height: 18px; top: -9px; left: 50%; transform: translateX(-50%) rotate(2.5deg);
+      background: var(--tape); border: 1px solid var(--tape-edge);
+      box-shadow: 0 1px 2px rgba(18, 42, 84, 0.10);
+    }
+    .c-photo img {
+      display: block; width: 100%; height: auto; border-radius: 2px;
+      outline: 1px solid rgba(0, 0, 0, 0.1); outline-offset: -1px; pointer-events: none;
+    }
     .c-dek { color: var(--muted); font-size: 0.94rem; margin: 0 0 1rem; text-wrap: pretty; }
     .c-dek:last-child { margin-bottom: 0; }
     .byline { color: var(--faint); font-size: 0.82rem; font-style: italic; }
@@ -315,6 +334,8 @@
       .intro { position: relative; left: auto; top: auto; margin: 0 auto 0.5rem; pointer-events: auto; }
       .card { position: relative !important; transform: none !important; width: 100% !important; max-width: 440px; margin: 0 auto; cursor: default; }
       .card-wobble { transform: none !important; }
+      .c-photo { position: relative; top: auto; right: auto; width: 72%; margin: 0.1rem 0 1.05rem 0.2rem; transform: rotate(-1.8deg); }
+      .has-photo .art-date, .has-photo .c-title { margin-right: 0; }
     }
   </style>
 </head>
@@ -328,8 +349,11 @@
       </header>
 
       <!-- Podcast feature (ruled + double tape) -->
-      <article class="card" data-x="470" data-y="34" data-tilt="2" style="--w: 322px; --d: 90ms;">
-        <div class="card-tilt"><div class="card-wobble taped"><div class="card-face ruled">
+      <article class="card" data-x="470" data-y="34" data-tilt="2" style="--w: 360px; --d: 90ms;">
+        <div class="card-tilt"><div class="card-wobble taped"><div class="card-face ruled has-photo">
+          <figure class="c-photo">
+            <img src="assets/podcast.jpg" alt="Nam Pham and the host in conversation on the podcast" />
+          </figure>
           <p class="art-date">Jul 2026</p>
           <h2 class="c-title">Making Complex AI Systems Usable Across Teams</h2>
           <p class="c-dek">A podcast conversation on turning solo AI experiments into shared research infrastructure at DoorDash.</p>
@@ -361,7 +385,7 @@
       <!-- Subplotly (scallop + single tape) -->
       <article class="card scallop" data-x="576" data-y="378" data-tilt="3" style="--w: 302px; --d: 240ms;">
         <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
-          <h2 class="c-title">Subplot</h2>
+          <h2 class="c-title">Subplots</h2>
           <p class="c-dek">Movie DNA, decoded. Match films by the emotional wreckage they leave behind: found family, revenge arcs, one bad wedding.</p>
           <a class="c-link" href="https://subplotly.com/" target="_blank" rel="noopener">subplotly.com <span class="arrow" aria-hidden="true">→</span></a>
         </div></div></div>
@@ -382,11 +406,11 @@
         </div></div></div>
       </article>
 
-      <!-- End of Life Festival (photo) -->
+      <!-- End of Life Workshop (photo) -->
       <article class="card" data-x="378" data-y="576" data-tilt="-2.5" style="--w: 262px; --d: 480ms;">
         <div class="card-tilt"><div class="card-wobble tape-corner"><div class="photo-frame">
-          <img src="assets/end-of-life.jpg" alt="Participants in conversation around tables at the End of Life Festival workshop" />
-          <p class="photo-cap">End of Life Festival<span class="place">public workshop · New York</span></p>
+          <img src="assets/end-of-life.jpg" alt="Participants in conversation around tables at the End of Life workshop" />
+          <p class="photo-cap">End of Life Workshop<span class="place">public workshop · New York</span></p>
         </div></div></div>
       </article>
 
