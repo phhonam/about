@@ -256,6 +256,14 @@
     .c-link:hover { color: var(--accent-deep); }
     .card:not(.grabbing) .c-link:hover .arrow { translate: 4px 0; }
 
+    /* --- Series card --- */
+    .series-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+    .series-list .c-link { align-items: baseline; gap: 0.5rem; line-height: 1.35; }
+    .series-list .part {
+      flex: 0 0 auto; font-variant-numeric: tabular-nums; font-size: 0.74rem; font-weight: 700;
+      color: var(--faint); margin-right: -0.1rem;
+    }
+
     /* --- CV card --- */
     .cv-label { font-size: 0.8rem; font-weight: 600; color: var(--accent); margin: 0.9rem 0 0.3rem; }
     .cv-label:first-child { margin-top: 0; }
@@ -358,7 +366,7 @@
       </article>
 
       <!-- CV / trajectory (scallop + double tape) -->
-      <article class="card scallop" data-x="46" data-y="330" data-tilt="-1.5" style="--w: 330px; --d: 320ms;">
+      <article class="card scallop" data-x="20" data-y="330" data-tilt="-1.5" style="--w: 330px; --d: 320ms;">
         <div class="card-tilt"><div class="card-wobble taped"><div class="card-face ruled">
           <p class="cv-label">Currently</p>
           <div class="cv-row"><span><span class="cv-role">Sr. Researcher</span>, <span class="cv-org">DoorDash</span></span><span class="cv-year">2023—now</span></div>
@@ -372,14 +380,6 @@
         </div></div></div>
       </article>
 
-      <!-- Salon (scallop + single tape) -->
-      <article class="card scallop" data-x="978" data-y="352" data-tilt="-3.5" style="--w: 268px; --d: 400ms;">
-        <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
-          <h2 class="c-title">Interdisciplinary salons</h2>
-          <a class="c-link" href="https://weareagenius.com/" target="_blank" rel="noopener">first person plural <span class="arrow" aria-hidden="true">→</span></a>
-        </div></div></div>
-      </article>
-
       <!-- End of Life Festival (photo) -->
       <article class="card" data-x="378" data-y="576" data-tilt="-2.5" style="--w: 262px; --d: 480ms;">
         <div class="card-tilt"><div class="card-wobble tape-corner"><div class="photo-frame">
@@ -389,7 +389,7 @@
       </article>
 
       <!-- Contact (scallop + single tape) -->
-      <article class="card scallop" data-x="1012" data-y="586" data-tilt="2.5" style="--w: 250px; --d: 540ms;">
+      <article class="card scallop" data-x="1012" data-y="630" data-tilt="2.5" style="--w: 250px; --d: 540ms;">
         <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
           <p class="label">Say hello</p>
           <div class="contact-links">
@@ -399,12 +399,16 @@
         </div></div></div>
       </article>
 
-      <!-- Cursor & Claude Code article (scallop + single tape) -->
-      <article class="card scallop" data-x="672" data-y="636" data-tilt="-2" style="--w: 300px; --d: 600ms;">
+      <!-- AI Evals series (scallop + single tape) -->
+      <article class="card scallop" data-x="962" data-y="318" data-tilt="-2" style="--w: 330px; --d: 600ms;">
         <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
-          <p class="art-date">Feb 2026</p>
-          <h2 class="c-title">How Cursor &amp; Claude Code Are Changing Research</h2>
-          <a class="c-link" href="https://medium.com/design-doordash/how-cursor-claude-code-are-changing-research-at-doordash-and-deliveroo-c2b534018af5" target="_blank" rel="noopener">Read on Medium <span class="arrow" aria-hidden="true">→</span></a>
+          <p class="art-date">Series · Sep 2026</p>
+          <h2 class="c-title">Building AI Evals</h2>
+          <p class="c-dek">A two-part series on defining what “good” means for AI features, and whose judgment to trust.</p>
+          <ul class="series-list">
+            <li><a class="c-link" href="https://medium.com/design-doordash/building-ai-evals-who-gets-to-decide-whats-good-39671385f50d" target="_blank" rel="noopener"><span class="part">1</span>Who gets to decide what’s good? <span class="arrow" aria-hidden="true">→</span></a></li>
+            <li><a class="c-link" href="https://medium.com/@designdoordash/building-ai-evals-who-are-the-experts-f1dd8b0ffa29" target="_blank" rel="noopener"><span class="part">2</span>Who are the “experts”? <span class="arrow" aria-hidden="true">→</span></a></li>
+          </ul>
         </div></div></div>
       </article>
 
