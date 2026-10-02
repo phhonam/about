@@ -308,7 +308,7 @@
     }
 
     /* --- Coffee / tea stains (AI Evals card) --- */
-    .stains { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; }
+    .stains { position: absolute; inset: 0; z-index: 3; pointer-events: none; mix-blend-mode: multiply; }
     .stains svg { position: absolute; overflow: visible; }
     .stain-defs { position: absolute; width: 0; height: 0; }
 
@@ -363,6 +363,7 @@
       .card-wobble { transform: none !important; }
       .c-photo { position: relative; top: auto; right: auto; width: 72%; margin: 0.1rem 0 1.05rem 0.2rem; transform: rotate(-1.8deg); }
       .has-photo .art-date, .has-photo .c-title { margin-right: 0; }
+      .stains { clip-path: inset(0); }
     }
   </style>
 </head>
@@ -453,7 +454,7 @@
       </article>
 
       <!-- AI Evals series (scallop + single tape) -->
-      <article class="card scallop" data-x="962" data-y="318" data-tilt="-2" style="--w: 330px; --d: 600ms;">
+      <article class="card scallop" data-x="948" data-y="318" data-tilt="-2" style="--w: 330px; --d: 600ms;">
         <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
           <p class="art-date">Series · Sep 2026</p>
           <h2 class="c-title">Building AI Evals</h2>
@@ -485,23 +486,29 @@
               </filter>
             </defs>
           </svg>
-          <div class="stains" aria-hidden="true">
-            <!-- a big and a small sparkle soaked into the paper, edges bleeding outward -->
-            <svg viewBox="0 0 170 150" width="158" height="140" style="right:-30px; top:-26px; transform: rotate(6deg);">
-              <defs>
-                <path id="spark" d="M0 -1 C0.06 -0.42 0.42 -0.06 1 0 C0.42 0.06 0.06 0.42 0 1 C-0.06 0.42 -0.42 0.06 -1 0 C-0.42 -0.06 -0.06 -0.42 0 -1 Z"/>
-              </defs>
-              <g filter="url(#stain-bleed)">
-                <use href="#spark" transform="translate(66 88) scale(46)" fill="rgba(130,80,34,0.17)" stroke="rgba(130,80,34,0.17)" stroke-width="0.3" stroke-linejoin="round"/>
-                <use href="#spark" transform="translate(126 38) scale(21)" fill="rgba(130,80,34,0.17)" stroke="rgba(130,80,34,0.17)" stroke-width="0.5" stroke-linejoin="round"/>
-              </g>
-              <g filter="url(#stain-edge)">
-                <use href="#spark" transform="translate(66 88) scale(46)" fill="rgba(122,72,28,0.22)" stroke="rgba(112,66,26,0.3)" stroke-width="0.035" stroke-linejoin="round"/>
-                <use href="#spark" transform="translate(126 38) scale(21)" fill="rgba(122,72,28,0.22)" stroke="rgba(112,66,26,0.3)" stroke-width="0.07" stroke-linejoin="round"/>
-              </g>
-            </svg>
-          </div>
-        </div></div></div>
+        </div>
+        <div class="stains" aria-hidden="true">
+          <!-- coffee ring with a big and a small sparkle soaked in; sits on top of the card and bleeds past its edge -->
+          <svg viewBox="0 0 190 190" width="184" height="184" style="right:-78px; top:-70px; transform: rotate(12deg);">
+            <defs>
+              <path id="spark" d="M0 -1 C0.06 -0.42 0.42 -0.06 1 0 C0.42 0.06 0.06 0.42 0 1 C-0.06 0.42 -0.42 0.06 -1 0 C-0.42 -0.06 -0.06 -0.42 0 -1 Z"/>
+            </defs>
+            <g filter="url(#stain-rough)">
+              <circle cx="95" cy="95" r="62" fill="rgba(150,96,42,0.09)"/>
+              <circle cx="95" cy="95" r="58" fill="none" stroke="rgba(130,80,34,0.17)" stroke-width="14" filter="url(#stain-soft)"/>
+              <circle cx="95" cy="95" r="62" fill="none" stroke="rgba(112,66,26,0.55)" stroke-width="3" stroke-dasharray="340 50" stroke-linecap="round"/>
+            </g>
+            <g filter="url(#stain-bleed)">
+              <use href="#spark" transform="translate(88 104) scale(27)" fill="rgba(130,80,34,0.17)" stroke="rgba(130,80,34,0.17)" stroke-width="0.3" stroke-linejoin="round"/>
+              <use href="#spark" transform="translate(124 64) scale(12)" fill="rgba(130,80,34,0.17)" stroke="rgba(130,80,34,0.17)" stroke-width="0.5" stroke-linejoin="round"/>
+            </g>
+            <g filter="url(#stain-edge)">
+              <use href="#spark" transform="translate(88 104) scale(27)" fill="rgba(122,72,28,0.22)" stroke="rgba(112,66,26,0.3)" stroke-width="0.04" stroke-linejoin="round"/>
+              <use href="#spark" transform="translate(124 64) scale(12)" fill="rgba(122,72,28,0.22)" stroke="rgba(112,66,26,0.3)" stroke-width="0.08" stroke-linejoin="round"/>
+            </g>
+          </svg>
+        </div>
+        </div></div>
       </article>
 
     </div>
