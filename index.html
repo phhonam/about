@@ -247,6 +247,24 @@
       font-size: 1.1rem; line-height: 1.28; letter-spacing: -0.02em;
       margin: 0 0 0.55rem; text-wrap: balance;
     }
+    .c-photo {
+      position: relative;
+      width: 76%; margin: 0.1rem 0 1.05rem 0.2rem;
+      background: #fffefb; padding: 7px 7px 0; border-radius: 5px;
+      box-shadow: 0 1px 2px rgba(18, 42, 84, 0.14), 0 7px 15px -5px rgba(18, 42, 84, 0.32);
+      transform: rotate(-1.8deg);
+    }
+    .c-photo::before {
+      content: ""; position: absolute; z-index: 2;
+      width: 58px; height: 18px; top: -9px; left: 50%; transform: translateX(-50%) rotate(2.5deg);
+      background: var(--tape); border: 1px solid var(--tape-edge);
+      box-shadow: 0 1px 2px rgba(18, 42, 84, 0.10);
+    }
+    .c-photo img {
+      display: block; width: 100%; height: auto; border-radius: 2px;
+      outline: 1px solid rgba(0, 0, 0, 0.1); outline-offset: -1px; pointer-events: none;
+    }
+    .c-photo figcaption { padding: 6px 3px 7px; font-size: 0.74rem; line-height: 1.25; color: var(--faint); font-style: italic; }
     .c-dek { color: var(--muted); font-size: 0.94rem; margin: 0 0 1rem; text-wrap: pretty; }
     .c-dek:last-child { margin-bottom: 0; }
     .byline { color: var(--faint); font-size: 0.82rem; font-style: italic; }
@@ -330,6 +348,10 @@
       <!-- Podcast feature (ruled + double tape) -->
       <article class="card" data-x="470" data-y="34" data-tilt="2" style="--w: 322px; --d: 90ms;">
         <div class="card-tilt"><div class="card-wobble taped"><div class="card-face ruled">
+          <figure class="c-photo">
+            <img src="assets/podcast.jpg" alt="Nam Pham and the host in conversation on the podcast" />
+            <figcaption>How to AI UXR · episode 3</figcaption>
+          </figure>
           <p class="art-date">Jul 2026</p>
           <h2 class="c-title">Making Complex AI Systems Usable Across Teams</h2>
           <p class="c-dek">A podcast conversation on turning solo AI experiments into shared research infrastructure at DoorDash.</p>
@@ -359,7 +381,7 @@
       </article>
 
       <!-- Subplotly (scallop + single tape) -->
-      <article class="card scallop" data-x="576" data-y="378" data-tilt="3" style="--w: 302px; --d: 240ms;">
+      <article class="card scallop" data-x="640" data-y="486" data-tilt="3" style="--w: 302px; --d: 240ms;">
         <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
           <h2 class="c-title">Subplot</h2>
           <p class="c-dek">Movie DNA, decoded. Match films by the emotional wreckage they leave behind: found family, revenge arcs, one bad wedding.</p>
