@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whose judgment counts in LLM AI evaluation? · Nam Pham</title>
+  <meta name="description" content="Slides from Nam Pham and Valerie Vegera's talk at Quant UX Con 2026: how research at DoorDash helps teams define good LLM answers, learn from disagreement, and decide what to change." />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  <meta name="theme-color" content="#1f4fd0" />
+  <meta property="og:title" content="Whose judgment counts in LLM AI evaluation?" />
+  <meta property="og:description" content="Talk slides, Quant UX Con 2026." />
+  <meta property="og:image" content="/assets/talk/01.webp" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --canvas-top: #e8f2fd;
+      --canvas-bot: #cbe0f6;
+      --dot:        rgba(30, 79, 176, 0.08);
+      --paper:  #fffdf8;
+      --ink:    #17263f;
+      --muted:  #566a88;
+      --faint:  #8493ac;
+      --accent: #1f4fd0;
+      --accent-deep: #143b9e;
+      --tape: rgba(226, 232, 210, 0.5);
+      --tape-edge: rgba(120, 130, 90, 0.16);
+      --sans: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --head: "Ioskeley Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+      --spring: cubic-bezier(0.34, 1.28, 0.5, 1);
+    }
+
+    @font-face {
+      font-family: "Ioskeley Mono";
+      src: url("/assets/fonts/IoskeleyMono-Bold.woff2") format("woff2");
+      font-weight: 700; font-style: normal; font-display: swap;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.55;
+      background:
+        radial-gradient(var(--dot) 1.3px, transparent 1.4px) 0 0 / 24px 24px,
+        linear-gradient(180deg, var(--canvas-top), var(--canvas-bot));
+      background-attachment: fixed;
+    }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: rgba(31, 79, 208, 0.18); }
+    :focus-visible { outline: 2.5px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+    .page { width: min(1040px, 100% - 2.2rem); margin: 0 auto; padding: 2.2rem 0 4rem; }
+
+    .back {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-weight: 600; font-size: 0.86rem; color: var(--accent);
+    }
+    .back .arrow { transition: translate 240ms var(--ease); }
+    .back:hover { color: var(--accent-deep); }
+    .back:hover .arrow { translate: -4px 0; }
+
+    .head { margin: 1.6rem 0 1.5rem; max-width: 46rem; }
+    .eyebrow { font-size: 0.82rem; font-weight: 500; color: var(--faint); margin: 0 0 0.55rem; }
+    h1 {
+      font-family: var(--head); font-weight: 700;
+      font-size: clamp(1.45rem, 3.4vw, 2.1rem); line-height: 1.2; letter-spacing: -0.02em;
+      margin: 0 0 0.8rem; text-wrap: balance;
+    }
+    .dek { color: var(--muted); font-size: 1rem; margin: 0; text-wrap: pretty; }
+    .dek .with { color: var(--ink); font-weight: 500; }
+
+    /* ===== Viewer ===== */
+    .deck {
+      position: relative;
+      background: var(--paper);
+      border-radius: 14px;
+      padding: 0.85rem 0.85rem 0.7rem;
+      filter: drop-shadow(0 10px 20px rgba(18, 42, 84, 0.16));
+    }
+    .deck::before, .deck::after {
+      content: ""; position: absolute; z-index: 2;
+      width: 84px; height: 22px; top: -11px;
+      background: var(--tape); border: 1px solid var(--tape-edge);
+      box-shadow: 0 1px 2px rgba(18, 42, 84, 0.10);
+    }
+    .deck::before { left: 8%; transform: rotate(-5deg); }
+    .deck::after  { right: 8%; transform: rotate(4deg); }
+
+    .slide {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #f5f0e8;
+      outline: 1px solid rgba(0, 0, 0, 0.1); outline-offset: -1px;
+      touch-action: pan-y;
+      user-select: none; -webkit-user-select: none;
+    }
+    .slide img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+
+    .nav {
+      position: absolute; top: 50%; z-index: 3;
+      width: 44px; height: 44px; margin-top: -22px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(18, 42, 84, 0.08); border-radius: 50%;
+      background: rgba(255, 253, 248, 0.92);
+      box-shadow: 0 1px 2px rgba(18, 42, 84, 0.16), 0 6px 14px -4px rgba(18, 42, 84, 0.3);
+      color: var(--accent); font: 600 1.05rem/1 var(--sans);
+      cursor: pointer;
+      opacity: 0; transition: opacity 200ms var(--ease), scale 160ms var(--ease);
+    }
+    .nav.prev { left: 0.7rem; } .nav.next { right: 0.7rem; }
+    .deck:hover .nav, .nav:focus-visible { opacity: 1; }
+    .nav:active { scale: 0.94; }
+    .nav[disabled] { display: none; }
+    @media (hover: none) { .nav { opacity: 0.9; width: 40px; height: 40px; margin-top: -20px; } }
+
+    .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 0.3rem 0.1rem; }
+    .count { font-variant-numeric: tabular-nums; font-size: 0.86rem; font-weight: 600; color: var(--muted); }
+    .count b { color: var(--ink); font-weight: 600; }
+    .c-link { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; font-size: 0.86rem; color: var(--accent); }
+    .c-link:hover { color: var(--accent-deep); }
+    .c-link .arrow { transition: translate 240ms var(--ease); }
+    .c-link:hover .arrow { translate: 4px 0; }
+
+    .thumbs {
+      display: flex; gap: 0.55rem; overflow-x: auto; padding: 0.9rem 0.3rem 0.45rem; margin: 0 -0.3rem;
+      scrollbar-width: thin; scrollbar-color: rgba(64, 116, 188, 0.35) transparent;
+    }
+    .thumbs button {
+      flex: 0 0 auto; width: 118px; padding: 0; border: 0; background: none; cursor: pointer;
+      border-radius: 5px; opacity: 0.62;
+      outline: 1px solid rgba(0, 0, 0, 0.12); outline-offset: -1px;
+      transition: opacity 180ms var(--ease), transform 220ms var(--spring);
+    }
+    .thumbs button img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 5px; background: #f5f0e8; }
+    .thumbs button:hover { opacity: 1; }
+    .thumbs button[aria-current="true"] { opacity: 1; outline: 2.5px solid var(--accent); outline-offset: 1px; }
+
+    .hint { margin: 1rem 0 0; font-size: 0.82rem; color: var(--faint); font-style: italic; }
+    @media (hover: none) { .hint { display: none; } }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .head > * { animation: rise 0.7s var(--ease) backwards; }
+      .head h1 { animation-delay: 0.06s; } .head .dek { animation-delay: 0.12s; }
+      .deck { animation: rise 0.7s var(--ease) 0.18s backwards; }
+    }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+    @media (max-width: 559px) {
+      .page { padding-top: 1.4rem; }
+      .deck { padding: 0.55rem 0.55rem 0.5rem; border-radius: 12px; }
+      .thumbs button { width: 92px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <a class="back" href="/"><span class="arrow" aria-hidden="true">←</span> nam pham</a>
+
+    <header class="head">
+      <p class="eyebrow">Talk · Quant UX Con 2026 · Oct 28</p>
+      <h1>Whose judgment counts in LLM AI evaluation?</h1>
+      <p class="dek">How research at DoorDash helps teams define good LLM answers, learn from disagreement, and decide what to change. With <span class="with">Valerie Vegera</span>.</p>
+    </header>
+
+    <section class="deck" aria-roledescription="carousel" aria-label="Talk slides">
+      <div class="slide" id="slide">
+        <img id="cur" alt="" />
+        <button class="nav prev" id="prev" aria-label="Previous slide">←</button>
+        <button class="nav next" id="next" aria-label="Next slide">→</button>
+      </div>
+      <div class="bar">
+        <span class="count" aria-live="polite"><b id="n">1</b> / <span id="total">19</span></span>
+        <a class="c-link" href="https://drive.google.com/file/d/1L0Z7ewoJf-OFIr9WKxRabKGT_6LBAZZz/view" target="_blank" rel="noopener">Open the PDF <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+      <div class="thumbs" id="thumbs" role="tablist" aria-label="Slide thumbnails"></div>
+    </section>
+    <p class="hint">Use ← → to move through the slides.</p>
+  </main>
+
+  <script>
+    (function () {
+      const ALTS = [
+  "QUANT UXR CONFERENCE 2026 Whose judgment counts in LLM AI evaluation? How Research at DoorDash helps teams define good LLM answers, learn from disagreement, and decide what to change Nam Pham Senior Researcher Valerie Vegera Senior Researcher",
+  "Eval is a team sport. Where should user research enter? Engineering Build, scale, and maintain the evaluation engine Product Sets product criteria. LLM judges Applies the criteria. Research Stewards the human judgment behind “good.” 11:30",
+  "Research grounds “good” in people’s needs, standards, and situations: Human judgment = Judgments + Reasons + Context How did they assess the output? What did “good” or “bad” mean in that assessment? Under what circumstances does that assessment apply?",
+  "Research captures human judgment through task definition, precise recruitment, and good survey design 1 2 3 Start with defining the specific task Define the whole task, intended outcome, and context. → Recruit the people this task applies to Who uses it, is affected by it, or has the knowledge to judge it? → Design and test how we ask Ask consistently. Capture independent answers, reasons and context. = Judgments + Reasons + Context Human judgment",
+  "Our recommendation work surfaced 3 kinds of judgment where Research helps clarify what “good” means Fit Authority Boundaries Does this fit the person’s needs and situation? Understand the person’s needs and situation, including what the system can’t see. Does the quality claim hold up? Understand the experience and standards behind a credible comparison. What should AI suggest or decide? Understand the consequences and the control people want to keep. EXAMPLE For a grilled cheese suggestion, ask whether the person would order it or make it at home. EXAMPLE For “best tacos nearby,” ask locals who know enough options to compare. EXAMPLE For menu improvement advice, ask owners which suggestions they’d use and which changes need their approval.",
+  "For personal fit, we asked customers what they would order for a particular meal Gen AI Carousels Fit 11:30 Judgments Would I order this for this meal? Human reference Reasons Why would I order or skip it? Each customer’s perspective Context Meal, people, dietary needs.",
+  "We paired customers’ ordering choices with explanations and ways to correct our assumptions Fit → → Anchor in their usual meal Review own food choices Capture reasons Why wouldn’t you order this? Pick ONE main reason One main reason Not to my taste ... Something else No, I would order this Write-in reason Allow correction",
+  "Customers’ reasons revealed household needs and delivery value beyond personal taste Internal starting categories Unwanted cuisine Poor timing Fit What customers’ reasons added ↓ Ordering for others Make it at home $ Delivery cost Travels poorly New judgement rubrics ↓ New dedicated LLM judges",
+  "Authority Experienced locals judge whether a restaurant recommendation deserves to be called “best” Judgments Does this deserve to be called ‘best’? Human reference Reasons Why would a local endorse it? Locals with comparative experience Context Where they live and eat. Places tried, food type, and what they value. ASK “BEST” QUeries",
+  "Authority To test “best,” we recruited experienced locals to name favorites, then rate the AI’s list Name their favorites first before showing LLM “best” Recruit experienced locals Rate LLM “best” ✓ ✓ ✓ Relevant area and food category Recent orders across several restaurants Explores and recommends local food → Which places serve the best [food] in [neighborhood]? 1 2 3 … → For this restaurant, which fits best? Truly one of the best Good, but not best Not a good fit Not sure or don’t know enough Validate with maps autocomplete!",
+  "Authority Locals’ nominations showed what a short list could cover and why favorites were missing West Hollywood burgers More concentrated nominations → Product implication Check whether missing places are available. Lower Manhattan noodles More dispersed nominations → Product implication Investigate available places the list missed.",
+  "Boundaries Operators judge when menu advice should become a change to their business Judgments Is this valuable and something I would implement? Human reference Reasons Why would I implement or not? Operators reviewing their own store Context Own menu, current business situation, competitive market MENU ASSISTANT",
+  "Boundaries We showed operators the menu issue, proposed change, and why it mattered Value How valuable is this for you and your store? Illustrative menu suggestion Item Caesar Salad 30-day intent How likely are you to implement this in the next 30 days? Issue Description gives little detail → Recommend Create and add \"dressing\" modifier Implementation on your behalf How comfortable are you with DoorDash implementing this on your behalf? X% of reviews mention dressing preference. Adding this could reduce order issues. Why Overall thoughts",
+  "Boundaries Research uncovers the conditions for turning menu advice into appropriate proactive action for AI Is it relevant to my business? Would I act on it? Should AI act proactively? Is this something that is a problem for my business? → Will addressing this have a positive impact on my business performance? → What should I allow AI to do and automate e.g., flag the issue, draft wording, or apply change? What needs my review?",
+  "We’ve collected human judgments. What comes next? Calibrate the AI judge Understand what limits alignment with people Prompt engineering, missing context, and differences between people. Use the human reference to improve and validate the judge’s assessments.",
+  "Align AI judgments with human judgments through autoresearch loop Write initial LLM judge prompt Score once to set baseline → Revise the judge prompt Try a prompt change. → Score on the training set Compare with human answers. → Compare with the best so far. Keep or discard ↑ Autoresearch: an AI agent tests prompt changes and keeps improvements.",
+  "Human review helps explain why AI judgments differ from people’s answers Did the judge misuse available information? Was important context never provided? Was the question or rule unclear? ↓ Improve the judge’s prompt or examples. ↓ Clarify it and collect fresh judgments. ↓ Ask for it, or limit what we predict. Example The judge treats one past order as a regular preference. Example The chosen label says cuisine; the explanation names an ingredient. Example The customer is ordering for others; the judge isn’t told who’s eating.",
+  "When people judge differently, what should “best” promise? Best among local options? Food quality, consistency, or buzz? → Best noodles nearby? Best for this person? Same person: quick lunch or relaxed dinner? → ↓ Improve the prompt for mistakes. Design for real differences. Show shared top choices, or offer variety and explain why.",
+  "Research adds value by helping teams decide whose judgment to trust and what to change Why are they credible for this question? How did we capture their reasons? What should we do when they disagree?"
+];
+      const total = ALTS.length;
+      const pad = (i) => String(i + 1).padStart(2, '0');
+      const full = (i) => `/assets/talk/${pad(i)}.webp`;
+
+      const cur = document.getElementById('cur');
+      const nEl = document.getElementById('n');
+      const prevB = document.getElementById('prev');
+      const nextB = document.getElementById('next');
+      const thumbs = document.getElementById('thumbs');
+      document.getElementById('total').textContent = total;
+
+      const tbtns = ALTS.map((alt, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('aria-label', `Go to slide ${i + 1}`);
+        const im = document.createElement('img');
+        im.src = `/assets/talk/t${pad(i)}.webp`;
+        im.alt = ''; im.loading = 'lazy'; im.width = 360; im.height = 202;
+        b.appendChild(im);
+        b.addEventListener('click', () => go(i));
+        thumbs.appendChild(b);
+        return b;
+      });
+
+      const fromHash = () => {
+        const n = parseInt(location.hash.slice(1), 10);
+        return n >= 1 && n <= total ? n - 1 : 0;
+      };
+
+      let i = -1;
+      const cache = new Set();
+      const preload = (k) => {
+        if (k < 0 || k >= total || cache.has(k)) return;
+        cache.add(k);
+        new Image().src = full(k);
+      };
+
+      function go(k, fromPop) {
+        k = Math.max(0, Math.min(total - 1, k));
+        if (k === i) return;
+        i = k;
+        cur.src = full(k);
+        cur.alt = `Slide ${k + 1} of ${total}: ${ALTS[k]}`;
+        nEl.textContent = k + 1;
+        prevB.disabled = k === 0;
+        nextB.disabled = k === total - 1;
+        tbtns.forEach((b, j) => {
+          if (j === k) { b.setAttribute('aria-current', 'true'); } else { b.removeAttribute('aria-current'); }
+        });
+        const t = tbtns[k];
+        const box = thumbs.getBoundingClientRect(), tb = t.getBoundingClientRect();
+        if (tb.left < box.left || tb.right > box.right) {
+          thumbs.scrollTo({ left: t.offsetLeft - (thumbs.clientWidth - t.offsetWidth) / 2, behavior: fromPop === 'init' ? 'auto' : 'smooth' });
+        }
+        preload(k + 1); preload(k - 1); preload(k + 2);
+        if (!fromPop) history.replaceState(null, '', k === 0 ? location.pathname : `#${k + 1}`);
+      }
+
+      prevB.addEventListener('click', () => go(i - 1));
+      nextB.addEventListener('click', () => go(i + 1));
+      document.addEventListener('keydown', (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const k = e.key;
+        if (k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && document.activeElement === document.body)) { e.preventDefault(); go(i + 1); }
+        else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); go(i - 1); }
+        else if (k === 'Home') { e.preventDefault(); go(0); }
+        else if (k === 'End') { e.preventDefault(); go(total - 1); }
+      });
+      window.addEventListener('hashchange', () => go(fromHash(), true));
+
+      // Swipe / click-to-advance on the slide
+      const slide = document.getElementById('slide');
+      let sx = 0, sy = 0, down = false;
+      slide.addEventListener('pointerdown', (e) => { if (e.target.closest('button')) return; down = true; sx = e.clientX; sy = e.clientY; });
+      slide.addEventListener('pointerup', (e) => {
+        if (!down) return; down = false;
+        const dx = e.clientX - sx, dy = e.clientY - sy;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.4) go(i + (dx < 0 ? 1 : -1));
+        else if (Math.abs(dx) < 6 && Math.abs(dy) < 6) {
+          const r = slide.getBoundingClientRect();
+          go(i + (e.clientX - r.left > r.width / 2 ? 1 : -1));
+        }
+      });
+      slide.addEventListener('pointercancel', () => { down = false; });
+
+      go(fromHash(), 'init');
+    })();
+  </script>
+</body>
+</html>
