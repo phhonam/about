@@ -10,7 +10,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
 
   <style>
     :root {
@@ -307,6 +307,30 @@
       color: var(--faint); margin-right: -0.1rem;
     }
 
+    .series-talk-label { font-size: 0.78rem; font-weight: 500; color: var(--faint); margin: 1.05rem 0 0.4rem; }
+    .series-list .part.play { font-size: 0.6rem; }
+    .series-list .c-link > span:last-child > .arrow { display: inline-block; }
+
+
+    /* --- Subplots poster fan (same spread as the shelves on subplotly.com), hangs off the card's right edge --- */
+    .has-fan .c-dek { margin-bottom: 0.45rem; }
+    .fan { position: absolute; z-index: 3; bottom: -0.55rem; right: -1.3rem; width: 124px; height: 88px; pointer-events: none; }
+    .fan img {
+      position: absolute; left: 50%; top: 5px; width: 52px; aspect-ratio: 2 / 3; object-fit: cover;
+      margin-left: -26px; border-radius: 3px; background: #e9e4da;
+      outline: 1px solid rgba(0, 0, 0, 0.12); outline-offset: -1px;
+      box-shadow: 0 1px 2px rgba(18, 42, 84, 0.2), 0 6px 12px -5px rgba(18, 42, 84, 0.5);
+      transition: transform 460ms var(--spring);
+    }
+    .fan img:nth-child(1) { transform: translateX(-26px) rotate(-8deg); filter: brightness(0.9); }
+    .fan img:nth-child(2) { transform: translateY(-4px); z-index: 2; }
+    .fan img:nth-child(3) { transform: translateX(26px) rotate(8deg); filter: brightness(0.9); }
+    @media (hover: hover) {
+      .card:hover .fan img:nth-child(1) { transform: translateX(-34px) rotate(-12deg); }
+      .card:hover .fan img:nth-child(2) { transform: translateY(-8px) scale(1.06); }
+      .card:hover .fan img:nth-child(3) { transform: translateX(34px) rotate(12deg); }
+    }
+
     /* --- Coffee / tea stains (AI Evals card) --- */
     .stains { position: absolute; inset: 0; z-index: 3; pointer-events: none; mix-blend-mode: multiply; }
     .stains svg { position: absolute; overflow: visible; }
@@ -358,12 +382,18 @@
       body { overflow: auto; }
       .stage { position: static; display: block; overflow: visible; }
       .board { position: relative; left: auto; top: auto; width: auto; height: auto; transform: none !important; display: flex; flex-direction: column; gap: 1.15rem; padding: 4.5rem 1.1rem 3rem; }
-      .intro { position: relative; left: auto; top: auto; margin: 0 auto 0.5rem; pointer-events: auto; }
+      .intro { position: relative; left: auto; top: auto; margin: 0 auto 0.5rem; pointer-events: auto; order: -1; }
+      /* Podcast, then AI Evals (with the talk), then the CV; the rest keep their source order */
+      .card { order: 4; }
+      .card-podcast { order: 1; }
+      .card-evals { order: 2; }
+      .card-cv { order: 3; }
       .card { position: relative !important; transform: none !important; width: 100% !important; max-width: 440px; margin: 0 auto; cursor: default; }
       .card-wobble { transform: none !important; }
       .c-photo { position: relative; top: auto; right: auto; width: 72%; margin: 0.1rem 0 1.05rem 0.2rem; transform: rotate(-1.8deg); }
       .has-photo .art-date, .has-photo .c-title { margin-right: 0; }
       .stains { clip-path: inset(0); }
+      .fan { right: 0.3rem; }
     }
   </style>
 </head>
@@ -377,7 +407,7 @@
       </header>
 
       <!-- Podcast feature (ruled + double tape) -->
-      <article class="card" data-x="470" data-y="34" data-tilt="2" style="--w: 360px; --d: 90ms;">
+      <article class="card card-podcast" data-x="470" data-y="34" data-tilt="2" style="--w: 360px; --d: 90ms;">
         <div class="card-tilt"><div class="card-wobble taped"><div class="card-face ruled has-photo">
           <figure class="c-photo">
             <img src="assets/podcast.jpg" alt="Nam Pham and the host in conversation on the podcast" />
@@ -411,16 +441,22 @@
       </article>
 
       <!-- Subplotly (scallop + single tape) -->
-      <article class="card scallop" data-x="576" data-y="378" data-tilt="3" style="--w: 302px; --d: 240ms;">
-        <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
+      <article class="card card-subplots scallop" data-x="522" data-y="344" data-tilt="3" style="--w: 340px; --d: 240ms;">
+        <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled has-fan">
           <h2 class="c-title">Subplots</h2>
-          <p class="c-dek">Movie DNA, decoded. Match films by the emotional wreckage they leave behind: found family, revenge arcs, one bad wedding.</p>
+          <p class="c-dek">A little knowledge-graph experiment that links movies by mood, like found family or one bad wedding. Mostly an excuse to watch more.</p>
           <a class="c-link" href="https://subplotly.com/" target="_blank" rel="noopener">subplotly.com <span class="arrow" aria-hidden="true">→</span></a>
-        </div></div></div>
+        </div>
+        <div class="fan" aria-hidden="true">
+          <img src="https://image.tmdb.org/t/p/w342/7Y9ILV1unpW9mLpGcqyGQU72LUy.jpg" alt="" loading="lazy" referrerpolicy="no-referrer" />
+          <img src="https://image.tmdb.org/t/p/w342/EKLR5c61XQzBTeMokFrmS3kdt8.jpg" alt="" loading="lazy" referrerpolicy="no-referrer" />
+          <img src="https://image.tmdb.org/t/p/w342/riSUxwoK3xjkOgy6YJSvPhi7cO6.jpg" alt="" loading="lazy" referrerpolicy="no-referrer" />
+        </div>
+        </div></div>
       </article>
 
       <!-- CV / trajectory (scallop + double tape) -->
-      <article class="card scallop" data-x="20" data-y="330" data-tilt="-1.5" style="--w: 330px; --d: 320ms;">
+      <article class="card card-cv scallop" data-x="20" data-y="330" data-tilt="-1.5" style="--w: 330px; --d: 320ms;">
         <div class="card-tilt"><div class="card-wobble taped"><div class="card-face ruled">
           <p class="cv-label">Currently</p>
           <div class="cv-row"><span><span class="cv-role">Sr. Researcher</span>, <span class="cv-org">DoorDash</span></span><span class="cv-year">2023—now</span></div>
@@ -435,7 +471,7 @@
       </article>
 
       <!-- End of Life Workshop (photo) -->
-      <article class="card" data-x="378" data-y="576" data-tilt="-2.5" style="--w: 262px; --d: 480ms;">
+      <article class="card" data-x="322" data-y="592" data-tilt="-2.5" style="--w: 262px; --d: 480ms;">
         <div class="card-tilt"><div class="card-wobble tape-corner"><div class="photo-frame">
           <img src="assets/end-of-life.jpg" alt="Participants in conversation around tables at the End of Life workshop" />
           <p class="photo-cap">End of Life Workshop<span class="place">public workshop · New York</span></p>
@@ -443,7 +479,7 @@
       </article>
 
       <!-- Contact (scallop + single tape) -->
-      <article class="card scallop" data-x="1012" data-y="630" data-tilt="2.5" style="--w: 250px; --d: 540ms;">
+      <article class="card scallop" data-x="1012" data-y="662" data-tilt="2.5" style="--w: 250px; --d: 540ms;">
         <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
           <p class="label">Say hello</p>
           <div class="contact-links">
@@ -454,14 +490,18 @@
       </article>
 
       <!-- AI Evals series (scallop + single tape) -->
-      <article class="card scallop" data-x="948" data-y="318" data-tilt="-2" style="--w: 330px; --d: 600ms;">
+      <article class="card card-evals scallop" data-x="948" data-y="286" data-tilt="-2" style="--w: 330px; --d: 600ms;">
         <div class="card-tilt"><div class="card-wobble tape1"><div class="card-face ruled">
-          <p class="art-date">Series · Sep 2026</p>
+          <p class="art-date">Series · Sep–Nov 2026</p>
           <h2 class="c-title">Building AI Evals</h2>
           <p class="c-dek">A two-part series on defining what “good” means for AI features, and whose judgment to trust.</p>
           <ul class="series-list">
             <li><a class="c-link" href="https://medium.com/design-doordash/building-ai-evals-who-gets-to-decide-whats-good-39671385f50d" target="_blank" rel="noopener"><span class="part">1</span>Who gets to decide what’s good? <span class="arrow" aria-hidden="true">→</span></a></li>
             <li><a class="c-link" href="https://medium.com/@designdoordash/building-ai-evals-who-are-the-experts-f1dd8b0ffa29" target="_blank" rel="noopener"><span class="part">2</span>Who are the “experts”? <span class="arrow" aria-hidden="true">→</span></a></li>
+          </ul>
+          <p class="series-talk-label">Talk · Quant UX Con, Oct 2026</p>
+          <ul class="series-list">
+            <li><a class="c-link" href="quant-uxr/"><span class="part play" aria-hidden="true">▶</span><span>Whose judgment counts in LLM AI evaluation? <span class="arrow" aria-hidden="true">→</span></span></a></li>
           </ul>
           <svg class="stain-defs" aria-hidden="true" focusable="false">
             <defs>
